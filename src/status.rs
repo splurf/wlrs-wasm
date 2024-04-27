@@ -1,10 +1,5 @@
 use yew::{html, Html};
 
-const SUCCESS: &str = "#4dff4d";
-const WARNING: &str = "#ffe400";
-const FAILURE: &str = "#ff5050";
-const INITIAL: &str = "#ffffff";
-
 enum Status {
     Success,
     Warning,
@@ -15,10 +10,10 @@ enum Status {
 impl Status {
     const fn as_str(&self) -> &'static str {
         match self {
-            Status::Success => SUCCESS,
-            Status::Warning => WARNING,
-            Status::Failure => FAILURE,
-            Status::Initial => INITIAL,
+            Status::Success => "#4dff4d",
+            Status::Warning => "#ffe400",
+            Status::Failure => "#ff5050",
+            Status::Initial => "#ffffff",
         }
     }
 }
@@ -76,6 +71,8 @@ impl StatusKind {
     }
 
     pub fn as_html(&self) -> Html {
-        html! { <p color={ self.status().as_str() } style="font-size: large"> { self.as_str() } </p> }
+        html! {
+            <p style={"color: ".to_owned() + self.status().as_str() + "; font-size: large;"}> {self.as_str()} </p>
+        }
     }
 }
