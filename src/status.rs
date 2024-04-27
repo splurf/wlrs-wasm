@@ -12,20 +12,19 @@ enum Status {
     Initial,
 }
 
-impl std::fmt::Display for Status {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
+impl Status {
+    const fn as_str(&self) -> &'static str {
+        match self {
             Status::Success => SUCCESS,
             Status::Warning => WARNING,
             Status::Failure => FAILURE,
             Status::Initial => INITIAL,
-        })
+        }
     }
 }
 
-#[derive(Default, PartialEq)]
+#[derive(PartialEq)]
 pub enum StatusKind {
-    #[default]
     Initial,
     Connection,
     ServerDown,
@@ -35,36 +34,6 @@ pub enum StatusKind {
     InvalidInput,
     Connecting,
     Unexpected,
-}
-
-impl std::fmt::Display for StatusKind {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.write_str(match self {
-            Self::Connection => "Failed to connect to server",
-            Self::ServerDown => "Minecraft server is down",
-            Self::PlayerNotFound => "Player doesn't exist",
-            Self::Whitelisted => "Already whitelisted",
-            Self::Success => "Success",
-            Self::InvalidInput => "Invalid input",
-            Self::Connecting => "Connecting...",
-            Self::Unexpected => "Unexpected server response",
-            _ => unreachable!(),
-        })
-    }
-}
-
-impl From<&StatusKind> for Status {
-    fn from(value: &StatusKind) -> Self {
-        match value {
-            StatusKind::Success | StatusKind::Whitelisted => Self::Success,
-            StatusKind::PlayerNotFound | StatusKind::InvalidInput => Self::Warning,
-            StatusKind::Connection | StatusKind::ServerDown | StatusKind::Unexpected => {
-                Self::Failure
-            }
-            StatusKind::Connecting => Self::Initial,
-            _ => unreachable!(),
-        }
-    }
 }
 
 impl StatusKind {
@@ -78,11 +47,35 @@ impl StatusKind {
         }
     }
 
+    const fn status(&self) -> Status {
+        match self {
+            Self::Success | Self::Whitelisted => Status::Success,
+            Self::PlayerNotFound | Self::InvalidInput => Status::Warning,
+            Self::Connection | Self::ServerDown | Self::Unexpected => Status::Failure,
+            Self::Connecting => Status::Initial,
+            _ => unreachable!(),
+        }
+    }
+
+    pub const fn as_str(&self) -> &'static str {
+        match self {
+            Self::Connection => "Failed to connect to server",
+            Self::ServerDown => "Minecraft server is down",
+            Self::PlayerNotFound => "Player doesn't exist",
+            Self::Whitelisted => "Already whitelisted",
+            Self::Success => "Success",
+            Self::InvalidInput => "Invalid input",
+            Self::Connecting => "Connecting...",
+            Self::Unexpected => "Unexpected server response",
+            _ => unreachable!(),
+        }
+    }
+
     pub const fn is_new(&self) -> bool {
         !matches!(self, Self::Initial)
     }
 
     pub fn as_html(&self) -> Html {
-        html! { <p color={ Status::from(self).to_string() }> { self.to_string() } </p> }
+        html! { <p color={ self.status().as_str() } style="font-size: large"> { self.as_str() } </p> }
     }
 }
