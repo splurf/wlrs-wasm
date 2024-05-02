@@ -15,8 +15,7 @@ dotenv = { version = "0.15.0", default-features = false }
 
 
 [profile.release]
-opt-level = "s"
+opt-level = "z"
 codegen-units = 1
 panic = "abort"
-strip = true
 lto = true
