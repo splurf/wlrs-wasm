@@ -1,4 +1,4 @@
 /dist
 /target
-*/env.rs
+**/env.rs
 Cargo.lock
