@@ -27,7 +27,8 @@ fn on_input(
 }
 
 fn on_submit(
-    text: UseStateHandle<String>,
+    user: UseStateHandle<String>,
+    pass: UseStateHandle<String>,
     label: UseStateHandle<StatusKind>,
 ) -> impl Fn(SubmitEvent) {
     move |event: SubmitEvent| {
@@ -35,15 +36,16 @@ fn on_submit(
         event.prevent_default();
 
         // current text input
-        let text = text.trim();
+        let user = user.trim();
+        let pass = pass.trim();
 
         // discontinue if the input is empty
-        if text.is_empty() {
+        if user.is_empty() || pass.is_empty() {
             return label.set(StatusKind::InvalidInput);
         }
 
         // only communicate with server if input exists
-        let ws = match WebSocket::new(env::WLRS_WEBSOCKET_ADDR) {
+        let ws = match WebSocket::new(env::WEBSOCKET_ADDR) {
             Ok(s) => s,
             Err(_) => {
                 log::error!("{}", StatusKind::Connection.as_str());
@@ -70,12 +72,19 @@ fn on_submit(
         }
 
         {
-            let text = text.to_owned();
+            let user = user.to_owned();
+            let pass = pass.to_owned();
             let label = label.clone();
             let ws_clone = ws.clone();
             let ws_onopen = Closure::wrap(Box::new(move || {
                 label.set(StatusKind::Connecting);
-                _ = ws_clone.send_with_str(text.as_str())
+                let data = [
+                    [user.len() as u8].as_slice(),
+                    user.as_bytes(),
+                    pass.as_bytes(),
+                ]
+                .concat();
+                _ = ws_clone.send_with_u8_array(data.as_slice());
             }) as Box<dyn Fn()>);
             ws.set_onopen(Some(ws_onopen.as_ref().unchecked_ref()));
             ws_onopen.forget();
@@ -97,22 +106,28 @@ fn on_submit(
 #[allow(non_snake_case)]
 #[function_component]
 fn App() -> Html {
-    let text = use_state_eq(String::new);
+    let user = use_state_eq(String::new);
+    let pass = use_state_eq(String::new);
+
     let label_opt = use_state_eq(|| StatusKind::Initial);
 
-    let oninput = on_input(text.clone(), label_opt.clone());
-    let onsubmit = on_submit(text.clone(), label_opt.clone());
+    let oninput_user = on_input(user.clone(), label_opt.clone());
+    let oninput_pass = on_input(pass.clone(), label_opt.clone());
+    let onsubmit = on_submit(user.clone(), pass.clone(), label_opt.clone());
 
     html! {
         <div style="display: flex; width: 100vw; height: 100vh; justify-content: center; align-items: center; text-align: center;">
-            <div style="background-color: #545454; padding: 20px; border-radius: 8px;">
-                <form {onsubmit}>
-                    <input {oninput} type="text" placeholder="Enter Minecraft Player Name" style="font-size: large; margin-right: 0.2vw;"/>
-                    <input type="submit" value="Submit" style="font-size: large;"/>
+            <div style="width: 45vw; height: 35vh; background-color: #142009; padding: 1vw; border-radius: 6px; border: 2px solid #5a5a5a;">
+                <h2 style="color: #71b039">{ "Autheticated Minecraft Server Whitelister" }</h2>
+                <form {onsubmit} style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;">
+                    <input oninput={oninput_user} type="text" placeholder="Username" style="margin-top: 2vh; width: 48%; height: 16%; background-color: #181a1b; color: white; border-radius: 4px; border-color: #736b5e; font-size: large; text-align: center;"/>
+                    <input oninput={oninput_pass} type="text" placeholder="Password" style="margin-top: 0.2vh; width: 48%; height: 16%; background-color: #181a1b; color: white; border-radius: 4px; border-color: #736b5e; font-size: large; text-align: center;"/>
+                    <input type="submit" value="SUBMIT" style="width: 25%; height: 10%; background-color: #181a1b; color: white; border-radius: 6px; border-color: #736b5e; margin-top: 1vh;"/>
+
+                    if label_opt.is_new() {
+                        { label_opt.as_html() }
+                    }
                 </form>
-                if label_opt.is_new() {
-                    { label_opt.as_html() }
-                }
             </div>
         </div>
     }

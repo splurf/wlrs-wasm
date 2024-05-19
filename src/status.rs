@@ -1,5 +1,10 @@
 use yew::{html, Html};
 
+const SUCCESS: &str = "#4dff4d";
+const WARNING: &str = "#ffe400";
+const FAILURE: &str = "#ff5050";
+const INITIAL: &str = "#ffffff";
+
 enum Status {
     Success,
     Warning,
@@ -10,10 +15,10 @@ enum Status {
 impl Status {
     const fn as_str(&self) -> &'static str {
         match self {
-            Status::Success => "#4dff4d",
-            Status::Warning => "#ffe400",
-            Status::Failure => "#ff5050",
-            Status::Initial => "#ffffff",
+            Status::Success => SUCCESS,
+            Status::Warning => WARNING,
+            Status::Failure => FAILURE,
+            Status::Initial => INITIAL,
         }
     }
 }
@@ -28,6 +33,7 @@ pub enum StatusKind {
     Success,
     InvalidInput,
     Connecting,
+    IncorrectPassword,
     Unexpected,
 }
 
@@ -38,6 +44,7 @@ impl StatusKind {
             1 => Self::PlayerNotFound,
             2 => Self::Whitelisted,
             3 => Self::Success,
+            4 => Self::IncorrectPassword,
             _ => Self::Unexpected,
         }
     }
@@ -45,10 +52,13 @@ impl StatusKind {
     const fn status(&self) -> Status {
         match self {
             Self::Success | Self::Whitelisted => Status::Success,
-            Self::PlayerNotFound | Self::InvalidInput => Status::Warning,
-            Self::Connection | Self::ServerDown | Self::Unexpected => Status::Failure,
-            Self::Connecting => Status::Initial,
-            _ => unreachable!(),
+            Self::Connection
+            | Self::ServerDown
+            | Self::Unexpected
+            | Self::PlayerNotFound
+            | Self::InvalidInput => Status::Warning,
+            Self::IncorrectPassword => Status::Failure,
+            Self::Connecting | Self::Initial => Status::Initial,
         }
     }
 
@@ -61,6 +71,7 @@ impl StatusKind {
             Self::Success => "Success",
             Self::InvalidInput => "Invalid input",
             Self::Connecting => "Connecting...",
+            Self::IncorrectPassword => "Incorrect password",
             Self::Unexpected => "Unexpected server response",
             _ => unreachable!(),
         }
@@ -71,8 +82,6 @@ impl StatusKind {
     }
 
     pub fn as_html(&self) -> Html {
-        html! {
-            <p style={"color: ".to_owned() + self.status().as_str() + "; font-size: large;"}> {self.as_str()} </p>
-        }
+        html! { <p style={ format!("font-size: large; color: {}", self.status().as_str()) } > { self.as_str() } </p> }
     }
 }
