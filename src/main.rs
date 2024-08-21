@@ -118,7 +118,7 @@ fn App() -> Html {
     html! {
         <div style="display: flex; width: 100vw; height: 100vh; justify-content: center; align-items: center; text-align: center;">
             <div style="width: 45vw; height: 35vh; background-color: #142009; padding: 1vw; border-radius: 6px; border: 2px solid #5a5a5a;">
-                <h2 style="color: #71b039">{ "Autheticated Minecraft Server Whitelister" }</h2>
+                <h2 style="color: #71b039">{ "Authenticated Minecraft Server Whitelister" }</h2>
                 <form {onsubmit} style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center;">
                     <input oninput={oninput_user} type="text" placeholder="Username" style="margin-top: 2vh; width: 48%; height: 16%; background-color: #181a1b; color: white; border-radius: 4px; border-color: #736b5e; font-size: large; text-align: center;"/>
                     <input oninput={oninput_pass} type="text" placeholder="Password" style="margin-top: 0.2vh; width: 48%; height: 16%; background-color: #181a1b; color: white; border-radius: 4px; border-color: #736b5e; font-size: large; text-align: center;"/>
