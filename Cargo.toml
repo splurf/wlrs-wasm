@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-yew = { version = "0.21.0", default-features = false, features = ["csr"] }
+log = { version = "0.4.22", default-features = false }
 wasm-logger = { version = "0.2.0", default-features = false }
-web-sys = { version = "0.3.69", default-features = false, features = ["HtmlInputElement"] }
-log = { version = "0.4.21", default-features = false }
+web-sys = { version = "0.3.70", default-features = false, features = [
+    "HtmlInputElement",
+] }
+yew = { version = "0.21.0", default-features = false, features = ["csr"] }
 
 [build-dependencies]
 dotenv = { version = "0.15.0", default-features = false }
